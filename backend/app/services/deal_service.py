@@ -15,20 +15,26 @@ async def create_deal(deal: DealCreate):
         deal.model_dump()
     )
 
-    return await db[COLLECTION_NAME].find_one(
+    created_deal = await db[COLLECTION_NAME].find_one(
         {"_id": result.inserted_id}
     )
+
+    if created_deal is None:
+        raise RuntimeError("Failed to retrieve created deal")
+
+    created_deal["id"] = str(created_deal.pop("_id"))
+    return created_deal
 
 
 async def get_deals():
     db = get_database()
 
-    return await (
-        db[COLLECTION_NAME]
-        .find()
-        .sort("_id", -1)
-        .to_list(length=100)
-    )
+    deals = await db[COLLECTION_NAME].find().to_list(length=1000)
+
+    for deal in deals:
+        deal["id"] = str(deal.pop("_id"))
+
+    return deals
 
 
 async def get_deal(deal_id: str):
@@ -50,6 +56,7 @@ async def get_deal(deal_id: str):
             detail="Deal not found",
         )
 
+    deal["id"] = str(deal.pop("_id"))
     return deal
 
 

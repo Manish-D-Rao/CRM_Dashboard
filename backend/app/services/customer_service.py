@@ -18,21 +18,26 @@ async def create_customer(customer: CustomerCreate):
         customer.model_dump()
     )
 
-    return await db[COLLECTION_NAME].find_one(
+    created_customer = await db[COLLECTION_NAME].find_one(
         {"_id": result.inserted_id}
     )
 
+    if created_customer is None:
+        raise RuntimeError("Failed to retrieve created customer")
+
+    created_customer["id"] = str(created_customer.pop("_id"))
+    print("CUSTOMER SERVICE RETURN:", created_customer)
+    return created_customer
 
 async def get_customers():
     db = get_database()
 
-    return await (
-        db[COLLECTION_NAME]
-        .find()
-        .sort("_id", -1)
-        .to_list(length=100)
-    )
+    customers = await db[COLLECTION_NAME].find().to_list(length=1000)
 
+    for customer in customers:
+        customer["id"] = str(customer.pop("_id"))
+
+    return customers
 
 async def get_customer(customer_id: str):
     db = get_database()
@@ -52,6 +57,8 @@ async def get_customer(customer_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found",
         )
+
+    customer["id"] = str(customer.pop("_id"))
 
     return customer
 

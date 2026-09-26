@@ -59,3 +59,10 @@ async def update_deal(
 )
 async def delete_deal(deal_id: str):
     await deal_service.delete_deal(deal_id)
+
+@router.put("/{deal_id}")
+async def update_deal(
+    deal_id: str,
+    deal: DealUpdate,
+):
+    return await deal_service.update_deal(deal_id, deal)

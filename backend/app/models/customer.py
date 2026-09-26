@@ -60,7 +60,7 @@ class CustomerUpdate(BaseModel):
 
 
 class CustomerResponse(BaseModel):
-    id: PyObjectId = Field(alias="_id")
+    id: PyObjectId
 
     name: str
     company: str

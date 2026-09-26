@@ -7,6 +7,7 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
+    field_validator,
 )
 
 
@@ -61,6 +62,14 @@ class DealCreate(BaseModel):
 
     owner: str | None = None
 
+    @field_validator("stage")
+    @classmethod
+    def validate_stage(cls, value: str) -> str:
+        if value not in DEAL_STAGES:
+            raise ValueError(
+                f"Invalid stage. Must be one of: {', '.join(DEAL_STAGES)}"
+            )
+        return value
 
 class DealUpdate(BaseModel):
     title: str | None = Field(
@@ -88,21 +97,23 @@ class DealUpdate(BaseModel):
 
     owner: str | None = None
 
+    @field_validator("stage")
+    @classmethod
+    def validate_stage(cls, value: str | None) -> str | None:
+        if value is not None and value not in DEAL_STAGES:
+            raise ValueError(
+                f"Invalid stage. Must be one of: {', '.join(DEAL_STAGES)}"
+            )
+        return value
+
 
 class DealResponse(BaseModel):
-    id: PyObjectId = Field(alias="_id")
+    id: PyObjectId
 
     title: str
     customer_id: PyObjectId
-
     value: float
     stage: str
     probability: int
-
     expected_close_date: date | None = None
-
     owner: str | None = None
-
-    model_config = ConfigDict(
-        populate_by_name=True,
-    )
