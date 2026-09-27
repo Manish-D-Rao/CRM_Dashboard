@@ -15,20 +15,26 @@ async def create_lead(lead: LeadCreate):
         lead.model_dump()
     )
 
-    return await db[COLLECTION_NAME].find_one(
+    created_lead = await db[COLLECTION_NAME].find_one(
         {"_id": result.inserted_id}
     )
 
+    if created_lead is None:
+        raise RuntimeError("Failed to retrieve created lead")
+
+    created_lead["id"] = str(created_lead.pop("_id"))
+    print("LEAD SERVICE RETURN:", created_lead)
+    return created_lead
 
 async def get_leads():
     db = get_database()
 
-    return await (
-        db[COLLECTION_NAME]
-        .find()
-        .sort("_id", -1)
-        .to_list(length=100)
-    )
+    leads = await db[COLLECTION_NAME].find().to_list(length=1000)
+
+    for lead in leads:
+        lead["id"] = str(lead.pop("_id"))
+
+    return leads
 
 
 async def get_lead(lead_id: str):
@@ -49,6 +55,8 @@ async def get_lead(lead_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Lead not found",
         )
+
+    lead["id"] = str(lead.pop("_id"))
 
     return lead
 

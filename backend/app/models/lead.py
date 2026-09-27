@@ -37,17 +37,14 @@ class LeadUpdate(BaseModel):
 
 
 class LeadResponse(BaseModel):
-    id: PyObjectId = Field(alias="_id")
+    id: PyObjectId
     name: str
     company: str
     email: str
     phone: str | None = None
-
     source: str
     status: str
 
-    converted_customer_id: PyObjectId | None = None
-
     model_config = ConfigDict(
-        populate_by_name=True
+        populate_by_name=True,
     )
