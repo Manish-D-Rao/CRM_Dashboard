@@ -22,6 +22,7 @@ class LeadCreate(BaseModel):
     company: str = Field(..., min_length=2, max_length=100)
     email: str = Field(..., min_length=5, max_length=150)
     phone: str | None = None
+    industry: str | None = None
 
     source: str = Field(default="Website")
     status: str = Field(default="New")
@@ -32,6 +33,7 @@ class LeadUpdate(BaseModel):
     company: str | None = Field(default=None, min_length=2)
     email: str | None = Field(default=None, min_length=5)
     phone: str | None = None
+    industry: str | None = None
     source: str | None = None
     status: str | None = None
 
@@ -42,6 +44,7 @@ class LeadResponse(BaseModel):
     company: str
     email: str
     phone: str | None = None
+    industry: str | None = None
     source: str
     status: str
 

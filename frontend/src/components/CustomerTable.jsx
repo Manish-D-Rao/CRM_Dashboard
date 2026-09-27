@@ -1,75 +1,68 @@
 import { crmStyles, getStatusBadgeClass } from "../styles/crmStyles.js";
 
-function DealTable({ deals, onView, onEdit, onDelete }) {
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(Number(value || 0));
-  };
-
+function CustomerTable({ customers, onEdit, onDelete, onCreateDeal }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className={crmStyles.tableHeader}>
           <tr>
+            <th className="px-6 py-3 font-medium">Name</th>
             <th className="px-6 py-3 font-medium">Company</th>
-
-            <th className="px-6 py-3 font-medium">Deal</th>
-
-            <th className="px-6 py-3 font-medium">Value</th>
-
-            <th className="px-6 py-3 font-medium">Stage</th>
-
+            <th className="px-6 py-3 font-medium">Email</th>
+            <th className="px-6 py-3 font-medium">Phone</th>
+            <th className="px-6 py-3 font-medium">Industry</th>
+            <th className="px-6 py-3 font-medium">Status</th>
             <th className="px-6 py-3 font-medium">Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          {deals.map((deal) => (
-            <tr key={deal.id} className={crmStyles.tableRow}>
-              {/* Company */}
+          {customers.map((customer) => (
+            <tr key={customer.id} className={crmStyles.tableRow}>
               <td className={`px-6 py-4 font-medium ${crmStyles.primaryText}`}>
-                {deal.company || "-"}
+                {customer.name}
               </td>
 
-              {/* Deal */}
               <td className={`px-6 py-4 ${crmStyles.secondaryText}`}>
-                {deal.title}
+                {customer.company}
               </td>
 
-              {/* Value */}
-              <td className={`px-6 py-4 font-medium ${crmStyles.primaryText}`}>
-                {formatCurrency(deal.value)}
+              <td className={`px-6 py-4 ${crmStyles.secondaryText}`}>
+                {customer.email}
               </td>
 
-              {/* Stage */}
+              <td className={`px-6 py-4 ${crmStyles.secondaryText}`}>
+                {customer.phone || "-"}
+              </td>
+
+              <td className={`px-6 py-4 ${crmStyles.secondaryText}`}>
+                {customer.industry || "-"}
+              </td>
+
               <td className="px-6 py-4">
-                <span className={getStatusBadgeClass(deal.stage)}>
-                  {deal.stage}
+                <span className={getStatusBadgeClass(customer.status)}>
+                  {customer.status}
                 </span>
               </td>
 
-              {/* Actions */}
               <td className="px-6 py-4">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => onView(deal)}
+                    onClick={() => onCreateDeal(customer)}
                     className={`${crmStyles.actionBase} ${crmStyles.actions.neutral}`}
                   >
-                    View
+                    Create Deal
                   </button>
 
                   <button
-                    onClick={() => onEdit(deal)}
+                    onClick={() => onEdit(customer)}
                     className={`${crmStyles.actionBase} ${crmStyles.actions.edit}`}
                   >
                     Edit
                   </button>
 
                   <button
-                    onClick={() => onDelete(deal.id)}
+                    onClick={() => onDelete(customer.id)}
                     className={`${crmStyles.actionBase} ${crmStyles.actions.delete}`}
                   >
                     Delete
@@ -84,4 +77,4 @@ function DealTable({ deals, onView, onEdit, onDelete }) {
   );
 }
 
-export default DealTable;
+export default CustomerTable;

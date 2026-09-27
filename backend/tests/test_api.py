@@ -3,6 +3,33 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
+def test_cors_allows_vite_fallback_port():
+    with TestClient(app) as client:
+        response = client.options(
+            "/api/leads/",
+            headers={
+                "Origin": "http://localhost:5174",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "http://localhost:5174"
+
+
+def create_test_customer(client):
+    response = client.post(
+        "/api/customers/",
+        json={
+            "name": "Deal Test Customer",
+            "company": "Deal Test Company",
+            "email": "deal-test@example.com",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
 def test_get_deals():
     with TestClient(app) as client:
         response = client.get("/api/deals/")
@@ -58,13 +85,14 @@ def test_create_deal_invalid_stage():
 def test_create_deal():
     payload = {
         "title": "Test Enterprise Deal",
-        "customer_id": "000000000000000000000000",
         "value": 250000,
         "stage": "Qualified",
         "probability": 40,
     }
 
     with TestClient(app) as client:
+        customer_id = create_test_customer(client)
+        payload["customer_id"] = customer_id
         response = client.post("/api/deals/", json=payload)
 
         assert response.status_code == 201
@@ -75,18 +103,60 @@ def test_create_deal():
         assert data["value"] == 250000
         assert data["stage"] == "Qualified"
         assert data["probability"] == 40
+        assert data["customer_id"] == customer_id
         assert "id" in data
+
+
+def test_customer_can_have_multiple_deals():
+    with TestClient(app) as client:
+        customer_id = create_test_customer(client)
+        deal_ids = []
+
+        for title in ("First Customer Deal", "Second Customer Deal"):
+            response = client.post(
+                "/api/deals/",
+                json={
+                    "title": title,
+                    "customer_id": customer_id,
+                    "value": 100000,
+                    "stage": "Lead",
+                    "probability": 10,
+                },
+            )
+
+            assert response.status_code == 201
+            data = response.json()
+            assert data["customer_id"] == customer_id
+            deal_ids.append(data["id"])
+
+        assert deal_ids[0] != deal_ids[1]
+
+
+def test_create_deal_requires_existing_customer():
+    payload = {
+        "title": "Orphan Deal",
+        "customer_id": "000000000000000000000000",
+        "value": 100000,
+        "stage": "Lead",
+        "probability": 10,
+    }
+
+    with TestClient(app) as client:
+        response = client.post("/api/deals/", json=payload)
+
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Customer not found"
 
 def test_get_deal():
     payload = {
         "title": "Single Deal Test",
-        "customer_id": "000000000000000000000000",
         "value": 100000,
         "stage": "Qualified",
         "probability": 40,
     }
 
     with TestClient(app) as client:
+        payload["customer_id"] = create_test_customer(client)
         create_response = client.post("/api/deals/", json=payload)
 
         assert create_response.status_code == 201
@@ -122,13 +192,13 @@ def test_get_deal_not_found():
 def test_get_deal_by_id():
     payload = {
         "title": "Get Test Deal",
-        "customer_id": "000000000000000000000000",
         "value": 100000,
         "stage": "Lead",
         "probability": 10,
     }
 
     with TestClient(app) as client:
+        payload["customer_id"] = create_test_customer(client)
         create_response = client.post("/api/deals/", json=payload)
 
         assert create_response.status_code == 201
@@ -147,25 +217,29 @@ def test_get_deal_by_id():
 def test_update_deal():
     payload = {
         "title": "Update Test Deal",
-        "customer_id": "000000000000000000000000",
+        "expected_close_date": "2026-12-15",
+        "owner": "Sales representative",
         "value": 100000,
         "stage": "Lead",
         "probability": 10,
     }
 
     with TestClient(app) as client:
+        payload["customer_id"] = create_test_customer(client)
         create_response = client.post("/api/deals/", json=payload)
 
         assert create_response.status_code == 201
 
         deal_id = create_response.json()["id"]
 
-        update_response = client.put(
+        update_response = client.patch(
             f"/api/deals/{deal_id}",
             json={
                 "stage": "Negotiation",
                 "probability": 70,
                 "value": 250000,
+                "expected_close_date": None,
+                "owner": None,
             },
         )
 
@@ -177,17 +251,19 @@ def test_update_deal():
         assert data["stage"] == "Negotiation"
         assert data["probability"] == 70
         assert data["value"] == 250000
+        assert data["expected_close_date"] is None
+        assert data["owner"] is None
 
 def test_delete_deal():
     payload = {
         "title": "Delete Test Deal",
-        "customer_id": "000000000000000000000000",
         "value": 50000,
         "stage": "Lead",
         "probability": 10,
     }
 
     with TestClient(app) as client:
+        payload["customer_id"] = create_test_customer(client)
         create_response = client.post("/api/deals/", json=payload)
 
         assert create_response.status_code == 201

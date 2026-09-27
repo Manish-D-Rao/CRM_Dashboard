@@ -25,7 +25,7 @@ async def connect_to_mongo() -> None:
 
     db = client[DATABASE_NAME]
 
-    print("Connected to MongoDB.")
+    print(f"Connected to MongoDB: {DATABASE_NAME}")
 
 
 async def close_mongo_connection() -> None:

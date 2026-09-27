@@ -23,7 +23,6 @@ async def create_lead(lead: LeadCreate):
         raise RuntimeError("Failed to retrieve created lead")
 
     created_lead["id"] = str(created_lead.pop("_id"))
-    print("LEAD SERVICE RETURN:", created_lead)
     return created_lead
 
 async def get_leads():
@@ -77,6 +76,9 @@ async def update_lead(
         exclude_unset=True,
         exclude_none=True,
     )
+    for field in ("phone", "industry"):
+        if field in lead.model_fields_set and getattr(lead, field) is None:
+            update_data[field] = None
 
     if not update_data:
         raise HTTPException(
@@ -147,7 +149,7 @@ async def convert_lead(lead_id: str):
         "company": lead["company"],
         "email": lead["email"],
         "phone": lead.get("phone"),
-        "industry": None,
+        "industry": lead.get("industry"),
         "status": "Active",
     }
 
@@ -167,6 +169,13 @@ async def convert_lead(lead_id: str):
         },
     )
 
-    return await db["customers"].find_one(
-        {"_id": customer_id}
+    created_customer = await db["customers"].find_one(
+    {"_id": customer_id}
     )
+
+    if created_customer is None:
+        raise RuntimeError("Failed to retrieve converted customer")
+
+    created_customer["id"] = str(created_customer.pop("_id"))
+
+    return created_customer

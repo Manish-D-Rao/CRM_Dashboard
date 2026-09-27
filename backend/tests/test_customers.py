@@ -105,6 +105,8 @@ def test_update_customer():
             f"/api/customers/{customer_id}",
             json={
                 "company": "New Company",
+                "phone": None,
+                "industry": None,
             },
         )
 
@@ -115,6 +117,8 @@ def test_update_customer():
         assert data["id"] == customer_id
         assert data["company"] == "New Company"
         assert data["name"] == "Update Test Customer"
+        assert data["phone"] is None
+        assert data["industry"] is None
 
 
 def test_delete_customer():

@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+	.crm-modal-scroll {
+		scrollbar-color: #b8b2bb #f0edf1;
+		scrollbar-width: thin;
+	}
+
+	.crm-modal-scroll::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.crm-modal-scroll::-webkit-scrollbar-track {
+		border-radius: 9999px;
+		background: #f0edf1;
+	}
+
+	.crm-modal-scroll::-webkit-scrollbar-thumb {
+		border: 1px solid #f0edf1;
+		border-radius: 9999px;
+		background: #b8b2bb;
+	}
+
+	.crm-modal-scroll::-webkit-scrollbar-thumb:hover {
+		background: #918b94;
+	}
+
+	.dark .crm-modal-scroll {
+		scrollbar-color: #5b5660 #25232a;
+	}
+
+	.dark .crm-modal-scroll::-webkit-scrollbar-track {
+		background: #25232a;
+	}
+
+	.dark .crm-modal-scroll::-webkit-scrollbar-thumb {
+		border-color: #25232a;
+		background: #5b5660;
+	}
+
+	.dark .crm-modal-scroll::-webkit-scrollbar-thumb:hover {
+		background: #857780;
+	}
+}

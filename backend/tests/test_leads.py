@@ -9,6 +9,7 @@ def test_create_lead():
         "company": "Test Company",
         "email": "testlead@example.com",
         "phone": "9876543210",
+        "industry": "Technology",
         "source": "Website",
         "status": "New",
     }
@@ -24,6 +25,7 @@ def test_create_lead():
         assert data["company"] == "Test Company"
         assert data["email"] == "testlead@example.com"
         assert data["phone"] == "9876543210"
+        assert data["industry"] == "Technology"
         assert data["source"] == "Website"
         assert data["status"] == "New"
         assert "id" in data
@@ -87,6 +89,7 @@ def test_update_lead():
         "company": "Old Company",
         "email": "updatelead@example.com",
         "phone": "9876543212",
+        "industry": "Technology",
     }
 
     with TestClient(app) as client:
@@ -104,6 +107,8 @@ def test_update_lead():
             json={
                 "company": "New Company",
                 "status": "Qualified",
+                "phone": None,
+                "industry": "Healthcare",
             },
         )
 
@@ -114,6 +119,16 @@ def test_update_lead():
         assert data["id"] == lead_id
         assert data["company"] == "New Company"
         assert data["status"] == "Qualified"
+        assert data["phone"] is None
+        assert data["industry"] == "Healthcare"
+
+        clear_industry_response = client.patch(
+            f"/api/leads/{lead_id}",
+            json={"industry": None},
+        )
+
+        assert clear_industry_response.status_code == 200
+        assert clear_industry_response.json()["industry"] is None
 
 
 def test_delete_lead():

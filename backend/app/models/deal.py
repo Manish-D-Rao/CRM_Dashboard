@@ -112,6 +112,8 @@ class DealResponse(BaseModel):
 
     title: str
     customer_id: PyObjectId
+    company: str | None = None
+
     value: float
     stage: str
     probability: int

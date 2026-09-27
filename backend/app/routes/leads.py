@@ -21,12 +21,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_lead(lead: LeadCreate):
-    result = await lead_service.create_lead(lead)
-
-    print("ROUTE RESULT:", result)
-    print("ROUTE RESULT KEYS:", result.keys())
-
-    return result
+    return await lead_service.create_lead(lead)
 
 @router.get(
     "/",

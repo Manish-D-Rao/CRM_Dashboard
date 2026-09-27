@@ -26,7 +26,6 @@ async def create_customer(customer: CustomerCreate):
         raise RuntimeError("Failed to retrieve created customer")
 
     created_customer["id"] = str(created_customer.pop("_id"))
-    print("CUSTOMER SERVICE RETURN:", created_customer)
     return created_customer
 
 async def get_customers():
@@ -79,6 +78,9 @@ async def update_customer(
         exclude_unset=True,
         exclude_none=True,
     )
+    for field in ("phone", "industry"):
+        if field in customer.model_fields_set and getattr(customer, field) is None:
+            update_data[field] = None
 
     if not update_data:
         raise HTTPException(

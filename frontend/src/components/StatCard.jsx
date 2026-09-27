@@ -1,17 +1,19 @@
+import { crmStyles } from "../styles/crmStyles.js";
+
 function StatCard({ title, value, change }) {
   return (
-    <article className="rounded-xl border border-gray-200 bg-white p-6">
-      <p className="text-sm font-medium text-gray-500">
+    <article className={`${crmStyles.card} p-6`}>
+      <p className={`text-sm font-medium ${crmStyles.secondaryText}`}>
         {title}
       </p>
 
-      <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900">
+      <p
+        className={`mt-2 text-2xl font-bold tracking-tight ${crmStyles.primaryText}`}
+      >
         {value}
       </p>
 
-      <p className="mt-2 text-xs text-gray-500">
-        {change}
-      </p>
+      <p className={`mt-2 text-xs ${crmStyles.secondaryText}`}>{change}</p>
     </article>
   );
 }
